@@ -31,14 +31,22 @@ Create a lens (GeoLens for example)
 Point Spread Function (PSF)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Calculate and visualize the PSF of the lens:
+Calculate and visualize the PSF of the lens using different models ("geometric", "coherent", "huygens"):
 
 .. code-block:: python
 
     # Calculate PSF for a point source
     # points: [x, y, z] where x,y are normalized [-1, 1], z is depth in mm (negative)
     point = torch.tensor([0.0, 0.0, -10000.0])  # On-axis, 10m away
-    psf = lens.psf(points=point, ks=128, spp=16384)
+    
+    # Geometric PSF (incoherent ray tracing)
+    psf_geo = lens.psf(points=point, ks=128, spp=16384, model="geometric")
+    
+    # Coherent PSF (Ray-Wave model)
+    psf_coh = lens.psf(points=point, ks=128, model="coherent")
+    
+    # Huygens PSF (Spherical wave integration)
+    psf_huy = lens.psf(points=point, ks=128, model="huygens")
     
     # Visualize PSF across the field
     lens.draw_psf_radial(save_name='./psf_radial.png', depth=-10000.0)
@@ -104,8 +112,7 @@ For fast PSF simulation using neural networks:
     
     # Create PSFNetLens with the original lens file
     lens = PSFNetLens(
-        lens_path='./datasets/lenses/camera/ef50mm_f1.8.json',
-        sensor_res=(3000, 3000)
+        lens_path='./datasets/lenses/camera/ef50mm_f1.8.json'
     )
     
     # Load pretrained network weights
