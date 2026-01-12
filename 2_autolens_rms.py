@@ -116,6 +116,7 @@ def curriculum_design(
                 )
                 self.surfaces[self.aper_idx].update_r(aper_r)
                 self.calc_pupil()
+                # 逐步增大光圈
 
                 # Correct lens shape and evaluate current design
                 if i > 0:

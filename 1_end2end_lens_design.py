@@ -41,11 +41,11 @@ def config():
         args = yaml.load(f, Loader=yaml.FullLoader)
 
     # ==> Result folder
-    characters = string.ascii_letters + string.digits
-    random_string = "".join(random.choice(characters) for i in range(4))
-    current_time = datetime.now().strftime("%m%d-%H%M%S")
-    exp_name = current_time + "-End2End-Lens-Design-" + random_string
-    result_dir = f"./results/{exp_name}"
+    characters = string.ascii_letters + string.digits                       # 构造一个可选字符集合
+    random_string = "".join(random.choice(characters) for i in range(4))    # 随机生成4个字符
+    current_time = datetime.now().strftime("%m%d-%H%M%S")                   # 获取当前时间字符串
+    exp_name = current_time + "-End2End-Lens-Design-" + random_string       # 拼接成实验名称
+    result_dir = f"./results/{exp_name}"                            # 结果文件夹路径    
     os.makedirs(result_dir, exist_ok=True)
     args["result_dir"] = result_dir
 
@@ -142,7 +142,7 @@ def end2end_train(lens: GeoLens, net, args):
             # ========================================
             # Line 3: Differentiable rendering with ray tracing
             # ========================================
-            img_render = lens.render(img_org)
+            img_render = lens.render(img_org)  
 
             # => Image restoration
             img_rec = net(img_render)
@@ -178,7 +178,9 @@ def end2end_train(lens: GeoLens, net, args):
             net.eval()
             with torch.no_grad():
                 # => Save data and simple evaluation
+                # 记录镜头参数/结构
                 lens.write_lens_json(f"{result_dir}/epoch{epoch + 1}.json")
+                # 对当前镜头做光学分析
                 lens.analysis(f"{result_dir}/epoch{epoch + 1}", render=False)
 
                 torch.save(net.state_dict(), f"{result_dir}/net_epoch{epoch + 1}.pth")
@@ -230,6 +232,8 @@ if __name__ == "__main__":
     lens.set_sensor_res(sensor_res=args["train"]["img_res"])
     lens.set_target_fov_fnum(rfov=20, fnum=4.0)
 
+    # 这里的意思不是直接成像和图像输入相同，而是在成像的基础上，再用一个Net去还原图像去逼近原图像
+    # 这里将net初始化为一个NAFNet，你也可以换成其他网络结构
     net = NAFNet(
         in_chan=3,
         out_chan=3,
